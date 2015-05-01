@@ -8,6 +8,7 @@
 #include <ngx_http.h>
 #include <ngx_conf_file.h>
 #include <nginx.h>
+#include <ngx_stream.h>
 
 #include "ngx_http_mruby_module.h"
 #include "ngx_http_mruby_core.h"
