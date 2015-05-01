@@ -46,16 +46,21 @@ RUN apt-get -y install libcgroup-dev
 RUN apt-get -y install make
 RUN apt-get -y install libpcre3 libpcre3-dev
 RUN apt-get -y install libmysqlclient-dev
+RUN apt-get -y install redis-server
 
-RUN cd /usr/local/src/ && git clone https://github.com/matsumoto-r/ngx_mruby.git
-ENV NGINX_CONFIG_OPT_ENV --with-http_stub_status_module --with-http_ssl_module --prefix=/usr/local/nginx --with-http_realip_module --with-http_addition_module --with-http_sub_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_random_index_module --with-http_secure_link_module
+RUN cd /usr/local/src/ && git clone https://github.com/kentaro/ngx_mruby.git && git checkout nginx-1.9.0-stream
+ENV NGINX_CONFIG_OPT_ENV --with-http_stub_status_module --with-http_ssl_module --prefix=/usr/local/nginx --with-http_realip_module --with-http_addition_module --with-http_sub_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_random_index_module --with-http_secure_link_module --with-stream
 RUN cd /usr/local/src/ngx_mruby && sh build.sh && make install
 
 EXPOSE 80
 EXPOSE 443
+EXPOSE 6379
+EXPOSE 6380
 
 ONBUILD ADD docker/hook /usr/local/nginx/hook
 ONBUILD ADD docker/conf /usr/local/nginx/conf
 ONBUILD ADD docker/conf/nginx.conf /usr/local/nginx/conf/nginx.conf
 
 CMD ["/usr/local/nginx/sbin/nginx"]
+CMD ["/usr/bin/redis-server", "--port 6379"]
+CMD ["/usr/bin/redis-server", "--port 6380"]
