@@ -338,7 +338,7 @@ static ngx_command_t ngx_http_mruby_commands[] = {
     ngx_http_mruby_set_handler },
 
   { ngx_string("mruby_set_code"),
-    NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF
+    NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_STREAM_MAIN_CONF|NGX_STREAM_SRV_CONF
             |NGX_CONF_2MORE,
     ngx_http_mruby_set_inline,
     NGX_HTTP_LOC_CONF_OFFSET,
