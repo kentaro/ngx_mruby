@@ -57,8 +57,8 @@ EXPOSE 443
 EXPOSE 11211
 EXPOSE 11212
 
-ONBUILD ADD docker/hook /usr/local/nginx/hook
-ONBUILD ADD docker/conf /usr/local/nginx/conf
-ONBUILD ADD docker/conf/nginx.conf /usr/local/nginx/conf/nginx.conf
+ADD docker/hook /usr/local/nginx/hook
+ADD docker/conf /usr/local/nginx/conf
+ADD docker/conf/nginx.conf /usr/local/nginx/conf/nginx.conf
 
 CMD ["/usr/local/nginx/hook/cmd.sh"]
