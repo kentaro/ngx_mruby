@@ -1384,30 +1384,40 @@ static char *ngx_http_mruby_content_phase(ngx_conf_t *cf, ngx_command_t *cmd,
   ngx_mrb_code_t *code;
   ngx_int_t rc;
 
+  unsigned int i;
+  unsigned int rb_file_count;
+  unsigned int cache = OFF;
+
   value = cf->args->elts;
-  code  = ngx_http_mruby_mrb_code_from_file(cf->pool, &value[1]);
-  if (code == NGX_CONF_UNSET_PTR) {
-    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "mrb_file(%s) open failed",
-        value[1].data);
-    return NGX_CONF_ERROR;
+  rb_file_count = cf->args->nelts - 1;
+
+  // If the last argument is `cache`
+  // eg. mruby_content_handler foo.rb [bar.rb ...] cache;
+  if (
+      cf->args->nelts >= 3 &&
+      ngx_strcmp(value[cf->args->nelts - 1].data, "cache") == 0
+     ) {
+    cache = ON;
+
+    // Skip the last argument
+    rb_file_count--;
   }
-  if (cf->args->nelts == 3) {
-    if (ngx_strcmp(value[2].data, "cache") == 0) {
-      code->cache = ON;
-    }
-    else {
-      ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-          "invalid parameter \"%V\", vaild parameter is only \"cache\"",
-          &value[2]);
+
+  for (i = 1; i <= rb_file_count; i++) {
+    code  = ngx_http_mruby_mrb_code_from_file(cf->pool, &value[i]);
+    if (code == NGX_CONF_UNSET_PTR) {
+      ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "mrb_file(%s) open failed",
+          value[i].data);
       return NGX_CONF_ERROR;
     }
-  }
-  mlcf->content_code = code;
-  rc = ngx_http_mruby_shared_state_compile(cf, mmcf->state, code);
-  if (rc != NGX_OK) {
-    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "mrb_file(%s) open failed",
-        value[1].data);
-    return NGX_CONF_ERROR;
+    code->cache = cache;
+    mlcf->content_code = code;
+    rc = ngx_http_mruby_shared_state_compile(cf, mmcf->state, code);
+    if (rc != NGX_OK) {
+      ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "mrb_file(%s) open failed",
+          value[i].data);
+      return NGX_CONF_ERROR;
+    }
   }
 
   return NGX_CONF_OK;
